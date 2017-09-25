@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    	http://www.springframework.org/schema/beans/spring-beans.xsd  
+        http://www.springframework.org/schema/mvc 
+        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd  
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx  
+        http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+	<!-- Mybatis 和 Spring的整合 -->
+	<!-- 1.数据源：DriverManagerDataSource -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<property name="url" value="jdbc:mysql://localhost:3306/ssm"></property>
+		<property name="username" value="root"></property>
+		<property name="password" value="root"></property>
+	</bean>
+
+	<!-- 2.Mybatis 的 SqlSession的工厂：SqlSessionFactoryBean dataSource引用数据源 Mybatis 
+		定义数据源，同意加载配置 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+	</bean>
+
+	<!-- 3. Mybatis自动扫描加载Sql映射文件/接口：MapperScannerConfigurer sqlSessionFactory 
+		basePackage:指定sql映射文件/接口所在的包（自动扫描） -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="org.bb.ssm.mapper"></property>
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+	</bean>
+
+	<!-- 4.事务管理：DataSourceTransactionManager dataSource 引用上面定义好的数据源 -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<!-- 5.使用声明式事务： transaction-manager = "txManager" tx:advice 这种 是用 aop方式管理事物 
+		annotation-driven 这种是注解方式管理事物 第一种方式，需要在spring配置文件配置一些参数 第二种方式，需要在 类里 加一些注解进行事物管理 
+		用一种就行，没必须都用 -->
+	<tx:annotation-driven transaction-manager="txManager" />
+
+</beans>
